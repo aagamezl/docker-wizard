@@ -1,9 +1,9 @@
 import './volumes.css'
 
 export function addVolume() {
-  const volumesList = document.querySelector('.volumes-list');
-  const volumeItem = document.createElement('div');
-  volumeItem.className = 'volume-item';
+  const volumesList = document.querySelector('.volumes-list')
+  const volumeItem = document.createElement('div')
+  volumeItem.className = 'volume-item'
   volumeItem.innerHTML = `
     <div class="volume-fields">
       <div class="form-group">
@@ -18,27 +18,28 @@ export function addVolume() {
     <button type="button" class="remove-volume">
       <i class="fas fa-trash"></i>
     </button>
-  `;
+  `
 
   volumeItem.querySelector('.remove-volume').addEventListener('click', () => {
-    volumeItem.remove();
-  });
+    volumeItem.remove()
+  })
 
-  volumesList.appendChild(volumeItem);
+  volumesList.appendChild(volumeItem)
 }
 
 export function getVolumes() {
-  const volumesList = document.querySelector('.volumes-list');
-  const volumeItems = volumesList.querySelectorAll('.volume-item');
-  const volumes = [];
+  const volumesList = document.querySelector('.volumes-list')
+  const volumeItems = volumesList.querySelectorAll('.volume-item')
+  const volumes = []
 
   volumeItems.forEach(volumeItem => {
-    const hostPath = volumeItem.querySelector('.host-path').value.trim();
-    const containerPath = volumeItem.querySelector('.container-path').value.trim();
-    if (hostPath && containerPath) {
-      volumes.push(`${hostPath}:${containerPath}`);
-    }
-  });
+    const hostPath = volumeItem.querySelector('.host-path').value.trim()
+    const containerPath = volumeItem.querySelector('.container-path').value.trim()
 
-  return volumes.join(',');
+    if (hostPath && containerPath) {
+      volumes.push(`${hostPath}:${containerPath}`)
+    }
+  })
+
+  return volumes
 }

@@ -4,11 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
+    "dev": "vite",
+    "lint": "standard",
+    "lint:fix": "standard --fix",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "standard": "^17.1.2",
     "vite": "^7.0.0"
   }
 }
