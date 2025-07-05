@@ -1,117 +1,120 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Docker & Docker Compose Wizard</title>
-    <link rel="stylesheet" href="src/assets/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>Docker & Docker Compose Wizard</h1>
-        <p>Create your Docker and Docker Compose files easily</p>
-      </header>
-      
-      <main>
-        <div class="wizard-steps">
-          <div class="step active">
-            <span class="step-number">1</span>
-            <span class="step-title">Project Info</span>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker & Docker Compose Wizard</title>
+  <link rel="stylesheet" href="src/assets/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Docker & Docker Compose Wizard</h1>
+      <p>Create your Docker and Docker Compose files easily</p>
+    </header>
+
+    <main>
+      <div class="wizard-steps">
+        <div class="step active">
+          <span class="step-number">1</span>
+          <span class="step-title">Project Info</span>
+        </div>
+        <div class="step">
+          <span class="step-number">2</span>
+          <span class="step-title">Docker Configuration</span>
+        </div>
+        <div class="step">
+          <span class="step-number">3</span>
+          <span class="step-title">Docker Compose</span>
+        </div>
+        <div class="step">
+          <span class="step-number">4</span>
+          <span class="step-title">Review & Generate</span>
+        </div>
+      </div>
+
+      <form id="wizard-form">
+        <div class="form-section active" data-step="1">
+          <h2>Project Information</h2>
+          <div class="form-group">
+            <label for="project-name">Project Name</label>
+            <input type="text" id="project-name" required>
           </div>
-          <div class="step">
-            <span class="step-number">2</span>
-            <span class="step-title">Docker Configuration</span>
-          </div>
-          <div class="step">
-            <span class="step-number">3</span>
-            <span class="step-title">Docker Compose</span>
-          </div>
-          <div class="step">
-            <span class="step-number">4</span>
-            <span class="step-title">Review & Generate</span>
+          <div class="form-group">
+            <label for="base-image">Base Image</label>
+            <input type="text" id="base-image" required>
           </div>
         </div>
 
-        <form id="wizard-form">
-          <div class="form-section active" data-step="1">
-            <h2>Project Information</h2>
-            <div class="form-group">
-              <label for="project-name">Project Name</label>
-              <input type="text" id="project-name" required>
-            </div>
-            <div class="form-group">
-              <label for="base-image">Base Image</label>
-              <input type="text" id="base-image" required>
-            </div>
+        <div class="form-section" data-step="2">
+          <h2>Docker Configuration</h2>
+          <div class="form-group">
+            <h3>Ports</h3>
+            <div class="ports-list"></div>
+            <button type="button" class="add-port">Add Port</button>
           </div>
+          <div class="form-group">
+            <label for="environment-variables">Environment Variables (key=value)</label>
+            <textarea id="environment-variables" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="working-dir">Working Directory</label>
+            <input type="text" id="working-dir" placeholder="/app">
+          </div>
+          <div class="form-group">
+            <label for="command">Command</label>
+            <input type="text" id="command">
+          </div>
+          <div class="form-group">
+            <label for="entrypoint">Entrypoint</label>
+            <input type="text" id="entrypoint">
+          </div>
+          <div class="form-group">
+            <h3>Volume Binding</h3>
+            <div class="volumes-list"></div>
+            <button type="button" class="add-volume">Add Volume</button>
+          </div>
+          <div class="form-group">
+            <label for="labels">Labels (key=value)</label>
+            <textarea id="labels" rows="2"></textarea>
+          </div>
+        </div>
 
-          <div class="form-section" data-step="2">
-            <h2>Docker Configuration</h2>
-            <div class="form-group">
-              <h3>Ports</h3>
-              <div class="ports-list">
-              </div>
-              <button type="button" class="add-port">Add Port</button>
-            </div>
-            <div class="form-group">
-              <label for="environment-variables">Environment Variables (key=value)</label>
-              <textarea id="environment-variables" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-              <label for="working-dir">Working Directory</label>
-              <input type="text" id="working-dir" placeholder="/app">
-            </div>
-            <div class="form-group">
-              <label for="command">Command</label>
-              <input type="text" id="command">
-            </div>
-            <div class="form-group">
-              <label for="entrypoint">Entrypoint</label>
-              <input type="text" id="entrypoint">
-            </div>
-            <div class="form-group">
-              <label for="volumes">Volumes (comma separated)</label>
-              <input type="text" id="volumes" placeholder="/data:/app/data">
-            </div>
-            <div class="form-group">
-              <label for="labels">Labels (key=value)</label>
-              <textarea id="labels" rows="2"></textarea>
-            </div>
+        <div class="form-section" data-step="3">
+          <h2>Docker Compose Configuration</h2>
+          <div class="form-group">
+            <h3>Services</h3>
+            <div class="services-list"></div>
+            <button type="button" class="add-service">Add Service</button>
           </div>
+        </div>
 
-          <div class="form-section" data-step="3">
-            <h2>Docker Compose Configuration</h2>
-            <div class="form-group">
-              <h3>Services</h3>
-              <div class="services-list"></div>
-              <button type="button" class="add-service">Add Service</button>
+        <div class="form-section" data-step="4">
+          <h2>Review & Generate</h2>
+          <div class="generated-files">
+            <div class="file-preview" id="dockerfile-preview">
+              <h3>Dockerfile</h3>
+              <pre><code></code></pre>
+            </div>
+            <div class="file-preview" id="docker-compose-preview">
+              <h3>docker-compose.yml</h3>
+              <pre><code></code></pre>
             </div>
           </div>
+        </div>
 
-          <div class="form-section" data-step="4">
-            <h2>Review & Generate</h2>
-            <div class="generated-files">
-              <div class="file-preview" id="dockerfile-preview">
-                <h3>Dockerfile</h3>
-                <pre><code></code></pre>
-              </div>
-              <div class="file-preview" id="docker-compose-preview">
-                <h3>docker-compose.yml</h3>
-                <pre><code></code></pre>
-              </div>
-            </div>
-          </div>
+        <div class="form-navigation">
+          <button type="button" class="prev-btn" disabled>Previous</button>
+          <button type="button" class="next-btn">Next</button>
+          <button type="button" class="generate-btn" disabled>Generate Files</button>
+        </div>
+      </form>
+    </main>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
 
-          <div class="form-navigation">
-            <button type="button" class="prev-btn" disabled>Previous</button>
-            <button type="button" class="next-btn">Next</button>
-            <button type="button" class="generate-btn" disabled>Generate Files</button>
-          </div>
-        </form>
-      </main>
-    </div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
 </html>
