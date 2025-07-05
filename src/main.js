@@ -1,4 +1,4 @@
-import { addService, } from './components/services/services-component.js'
+import { addService } from './components/services/services-component.js'
 import { addPort } from './components/ports/ports-component.js'
 import { addVolume, getVolumes } from './components/volumes/volumes-component.js'
 
@@ -7,15 +7,15 @@ import './assets/styles.css'
 // Constants
 const STEPS = {
   PROJECT_INFO: 1,
-  DOCKER_CONFIG: 2,
-  DOCKER_COMPOSE: 3,
-  REVIEW: 4
+  BUILD_ARGS: 2,
+  DOCKER_CONFIG: 3,
+  DOCKER_COMPOSE: 4,
+  REVIEW: 5
 }
 
 const TOAST_DURATION = 5000
 
 // DOM Elements
-const form = document.querySelector('#wizard-form')
 const steps = document.querySelectorAll('.step')
 const formSections = document.querySelectorAll('.form-section')
 const prevBtn = document.querySelector('.prev-btn')
@@ -38,6 +38,7 @@ const formData = {
     command: '',
     entrypoint: '',
     volumes: [],
+    ports: [],
     labels: ''
   },
   dockerCompose: {
@@ -49,7 +50,7 @@ const formData = {
 document.addEventListener('DOMContentLoaded', () => {
   updateStepUI()
   setupEventListeners()
-  
+
   // Add event listener for Add Volume button after DOM is loaded
   const addVolumeBtn = document.querySelector('.add-volume')
   if (addVolumeBtn) {
@@ -81,6 +82,9 @@ const handleNext = () => {
     case STEPS.PROJECT_INFO:
       if (!validateProjectInfo()) return
       break
+    case STEPS.BUILD_ARGS:
+      // No validation needed for Build Arguments step
+      break
     case STEPS.DOCKER_CONFIG:
       if (!validateDockerConfig()) return
       break
@@ -92,10 +96,8 @@ const handleNext = () => {
       break
   }
 
-  if (currentStep < STEPS.REVIEW) {
-    currentStep++
-    updateStepUI()
-  }
+  currentStep++
+  updateStepUI()
 }
 
 const handleStepClick = (e) => {
@@ -147,7 +149,7 @@ const validateProjectInfo = () => {
 
 const validateDockerConfig = () => {
   const environmentVariables = document.querySelector('#environment-variables')
-  const volumes = document.querySelector('#volumes')
+
   // Validate ports
   if (!validatePorts()) {
     return false
@@ -212,7 +214,6 @@ const validateDockerCompose = () => {
       showError('Please enter a service image')
       service.querySelector('input[placeholder="Image"]').focus()
       isValid = false
-      return
     }
   })
 
@@ -233,7 +234,6 @@ const validateDockerCompose = () => {
       showError('Please enter a valid container path')
       volume.querySelector('.container-path').focus()
       isValid = false
-      return
     }
   })
 
@@ -248,7 +248,7 @@ const isValidPort = (port) => {
 
 const isValidPath = (path) => {
   // Basic path validation - starts with / and contains only valid characters
-  return path.startsWith('/') && /^[a-zA-Z0-9_/\.\-]+$/.test(path)
+  return path.startsWith('/') && /^[a-zA-Z0-9_/.-]+$/.test(path)
 }
 
 const isValidPortNumber = (portNumber) => {
@@ -286,33 +286,24 @@ const validatePorts = () => {
       showError('Please select a valid protocol (TCP or UDP)')
       portItem.querySelector('.port-protocol').focus()
       isValid = false
-      return
     }
   })
 
   return isValid
 }
 
-const isValidVolumes = (volumes) => {
-  const volumeList = volumes.split(',').map(vol => vol.trim())
-  return volumeList.every(vol => 
-    vol && vol.includes(':') && 
-    vol.split(':').length === 2
-  )
-}
-
 const isValidLabels = (labels) => {
   const labelList = labels.split('\n')
-  return labelList.every(label => 
-    label.trim() && label.includes('=') && 
-    !label.startsWith('=') && 
+  return labelList.every(label =>
+    label.trim() && label.includes('=') &&
+    !label.startsWith('=') &&
     !label.endsWith('=')
   )
 }
 
 const isValidEnvVars = (vars) => {
   const envVars = vars.split('\n')
-  return envVars.every(varStr => 
+  return envVars.every(varStr =>
     varStr.trim() && varStr.includes('=')
   )
 }
@@ -356,67 +347,109 @@ const handleSubmit = (e) => {
   }
 
   // Collect form data
-  formData.project.name = document.querySelector('#project-name').value
-  formData.project.baseImage = document.querySelector('#base-image').value
-  // Collect ports
+  const project = {
+    name: document.querySelector('#project-name').value,
+    baseImage: document.querySelector('#base-image').value
+  }
+
+  // Get ports
   const portsList = document.querySelector('.ports-list')
   const portItems = portsList.querySelectorAll('.port-item')
-  formData.docker.ports = []
-
+  const ports = []
   portItems.forEach(portItem => {
     const portNumber = portItem.querySelector('.port-number').value.trim()
     const portProtocol = portItem.querySelector('.port-protocol').value
     
     if (portNumber) {
-      formData.docker.ports.push({
+      ports.push({
         number: parseInt(portNumber),
         protocol: portProtocol.toLowerCase()
       })
     }
   })
-  formData.docker.environmentVariables = document.querySelector('#environment-variables').value
-  formData.docker.workingDir = document.querySelector('#working-dir').value
-  formData.docker.command = document.querySelector('#command').value
-  formData.docker.entrypoint = document.querySelector('#entrypoint').value
-  formData.docker.volumes = getVolumes()
-  formData.docker.labels = document.querySelector('#labels').value
 
-  // Collect Docker Compose services
-  formData.dockerCompose.services = []
-  document.querySelectorAll('.service-item').forEach(service => {
-    const serviceName = service.querySelector('input[placeholder="Service Name"]').value
-    const serviceImage = service.querySelector('input[placeholder="Image"]').value
+  // Get services
+  const servicesList = document.querySelector('.services-list')
+  const serviceItems = servicesList.querySelectorAll('.service-item')
+  const services = []
+  serviceItems.forEach(serviceItem => {
+    const serviceName = serviceItem.querySelector('input[placeholder="Service Name"]').value.trim()
+    const serviceImage = serviceItem.querySelector('input[placeholder="Image"]').value.trim()
+    
     if (serviceName && serviceImage) {
-      formData.dockerCompose.services.push({
+      services.push({
         name: serviceName,
         image: serviceImage
       })
     }
   })
 
-  // Generate Dockerfile preview
+  // Generate files
   const dockerfilePreview = document.querySelector('#dockerfile-preview code')
-  dockerfilePreview.textContent = generateDockerfile()
-
-  // Generate Docker Compose preview
   const dockerComposePreview = document.querySelector('#docker-compose-preview code')
+  const buildCommandPreview = document.querySelector('#build-command-preview code')
+  const runCommandPreview = document.querySelector('#run-command-preview code')
+  
+  dockerfilePreview.textContent = generateDockerfile()
   dockerComposePreview.textContent = generateDockerCompose()
+
+  // Generate build command
+  const buildCommand = `docker build -t ${project.name} .`
+  buildCommandPreview.textContent = buildCommand
+
+  // Generate run command with volumes
+  let runCommand = `docker run -d --name ${project.name}`
+  if (ports.length > 0) {
+    ports.forEach(port => {
+      runCommand += ` -p ${port.number}/${port.protocol}`
+    })
+  }
+  const envVars = document.querySelector('#environment-variables').value.trim()
+  if (envVars) {
+    envVars.split('\n').forEach(env => {
+      if (env.trim()) {
+        runCommand += ` -e "${env.trim()}"`
+      }
+    })
+  }
+  const volumes = getVolumes()
+  if (volumes.length > 0) {
+    volumes.forEach(volume => {
+      runCommand += ` -v "${volume}"`
+    })
+  }
+  const workingDir = document.querySelector('#working-dir').value.trim()
+  if (workingDir) {
+    runCommand += ` -w "${workingDir}"`
+  }
+  const command = document.querySelector('#command').value.trim()
+  if (command) {
+    runCommand += ` ${command}`
+  } else {
+    const entrypoint = document.querySelector('#entrypoint').value.trim()
+    if (entrypoint) {
+      runCommand += ` --entrypoint "${entrypoint}"`
+    }
+  }
+  runCommandPreview.textContent = runCommand
+
+  // Enable generate button
+  generateBtn.disabled = false
 }
 
 const generateDockerfile = () => {
-  const { baseImage, name } = formData.project
-  const { 
-    exposedPorts, 
+  const { baseImage } = formData.project
+  const {
     environmentVariables,
     workingDir,
     command,
     entrypoint,
     labels
   } = formData.docker
-  const volumes = getVolumes()
+  // const volumes = getVolumes()
 
   let dockerfile = `FROM ${baseImage}\n\n`
-  
+
   // WORKDIR
   if (workingDir) {
     dockerfile += `WORKDIR ${workingDir}\n\n`
@@ -437,17 +470,6 @@ const generateDockerfile = () => {
       if (varStr.trim()) {
         const [key, value] = varStr.split('=').map(s => s.trim())
         dockerfile += `ENV ${key}=${value}\n`
-      }
-    })
-    dockerfile += '\n'
-  }
-
-  // VOLUME
-  if (volumes) {
-    const volumeList = volumes.split(',').map(vol => vol.trim())
-    volumeList.forEach(vol => {
-      if (vol) {
-        dockerfile += `VOLUME ["${vol}"]\n`
       }
     })
     dockerfile += '\n'
