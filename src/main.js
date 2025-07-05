@@ -1,5 +1,6 @@
 import { addService, } from './components/services/services-component.js'
 import { addPort } from './components/ports/ports-component.js'
+import { addVolume, getVolumes } from './components/volumes/volumes-component.js'
 
 import './assets/styles.css'
 
@@ -36,7 +37,7 @@ const formData = {
     workingDir: '',
     command: '',
     entrypoint: '',
-    volumes: '',
+    volumes: [],
     labels: ''
   },
   dockerCompose: {
@@ -48,6 +49,12 @@ const formData = {
 document.addEventListener('DOMContentLoaded', () => {
   updateStepUI()
   setupEventListeners()
+  
+  // Add event listener for Add Volume button after DOM is loaded
+  const addVolumeBtn = document.querySelector('.add-volume')
+  if (addVolumeBtn) {
+    addVolumeBtn.addEventListener('click', addVolume)
+  }
 })
 
 const setupEventListeners = () => {
@@ -141,8 +148,6 @@ const validateProjectInfo = () => {
 const validateDockerConfig = () => {
   const environmentVariables = document.querySelector('#environment-variables')
   const volumes = document.querySelector('#volumes')
-  const labels = document.querySelector('#labels')
-
   // Validate ports
   if (!validatePorts()) {
     return false
@@ -155,15 +160,29 @@ const validateDockerConfig = () => {
     return false
   }
 
-  // Validate volumes format
-  if (volumes.value.trim() && !isValidVolumes(volumes.value)) {
-    volumes.classList.add('error')
-    showError('Please enter valid volume mappings (format: /host:/container)')
-    volumes.focus()
-    return false
-  }
+  const volumesList = document.querySelector('.volumes-list')
+  const volumeItems = volumesList.querySelectorAll('.volume-item')
+  volumeItems.forEach(volume => {
+    const hostPath = volume.querySelector('.host-path').value
+    const containerPath = volume.querySelector('.container-path').value
+
+    if (hostPath.trim() && !isValidPath(hostPath)) {
+      volume.querySelector('.host-path').classList.add('error')
+      showError('Please enter a valid host path')
+      volume.querySelector('.host-path').focus()
+      return false
+    }
+
+    if (containerPath.trim() && !isValidPath(containerPath)) {
+      volume.querySelector('.container-path').classList.add('error')
+      showError('Please enter a valid container path')
+      volume.querySelector('.container-path').focus()
+      return false
+    }
+  })
 
   // Validate labels format
+  const labels = document.querySelector('#labels')
   if (labels.value.trim() && !isValidLabels(labels.value)) {
     labels.classList.add('error')
     showError('Please enter valid labels (key=value)')
@@ -197,6 +216,27 @@ const validateDockerCompose = () => {
     }
   })
 
+  const volumesList = document.querySelector('.volumes-list')
+  const volumes = volumesList.querySelectorAll('.volume-item')
+  volumes.forEach(volume => {
+    const hostPath = volume.querySelector('.host-path').value
+    const containerPath = volume.querySelector('.container-path').value
+
+    if (!hostPath.trim()) {
+      showError('Please enter a valid host path')
+      volume.querySelector('.host-path').focus()
+      isValid = false
+      return
+    }
+
+    if (!containerPath.trim()) {
+      showError('Please enter a valid container path')
+      volume.querySelector('.container-path').focus()
+      isValid = false
+      return
+    }
+  })
+
   return isValid
 }
 
@@ -204,6 +244,11 @@ const validateDockerCompose = () => {
 const isValidPort = (port) => {
   const portNumber = parseInt(port)
   return portNumber >= 1 && portNumber <= 65535
+}
+
+const isValidPath = (path) => {
+  // Basic path validation - starts with / and contains only valid characters
+  return path.startsWith('/') && /^[a-zA-Z0-9_/\.\-]+$/.test(path)
 }
 
 const isValidPortNumber = (portNumber) => {
@@ -333,7 +378,7 @@ const handleSubmit = (e) => {
   formData.docker.workingDir = document.querySelector('#working-dir').value
   formData.docker.command = document.querySelector('#command').value
   formData.docker.entrypoint = document.querySelector('#entrypoint').value
-  formData.docker.volumes = document.querySelector('#volumes').value
+  formData.docker.volumes = getVolumes()
   formData.docker.labels = document.querySelector('#labels').value
 
   // Collect Docker Compose services
@@ -366,9 +411,9 @@ const generateDockerfile = () => {
     workingDir,
     command,
     entrypoint,
-    volumes,
     labels
   } = formData.docker
+  const volumes = getVolumes()
 
   let dockerfile = `FROM ${baseImage}\n\n`
   
