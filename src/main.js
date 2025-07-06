@@ -1,6 +1,7 @@
 import { addService } from './components/services/services-component.js'
 import { addPort } from './components/ports/ports-component.js'
 import { addVolume, getVolumes } from './components/volumes/volumes-component.js'
+import { addBuildEnv, getBuildEnv } from './components/build-env/build-env-component.js'
 
 import './assets/styles.css'
 
@@ -51,10 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
   updateStepUI()
   setupEventListeners()
 
-  // Add event listener for Add Volume button after DOM is loaded
+  // Add event listeners for Add Volume and Add Build Env buttons after DOM is loaded
   const addVolumeBtn = document.querySelector('.add-volume')
   if (addVolumeBtn) {
     addVolumeBtn.addEventListener('click', addVolume)
+  }
+
+  const addBuildEnvBtn = document.querySelector('.add-build-env')
+  if (addBuildEnvBtn) {
+    addBuildEnvBtn.addEventListener('click', addBuildEnv)
   }
 })
 
@@ -397,19 +403,17 @@ const handleSubmit = (e) => {
   const buildCommand = `docker build -t ${project.name} .`
   buildCommandPreview.textContent = buildCommand
 
-  // Generate run command with volumes
+  // Generate run command with volumes and build environment variables
   let runCommand = `docker run -d --name ${project.name}`
   if (ports.length > 0) {
     ports.forEach(port => {
       runCommand += ` -p ${port.number}/${port.protocol}`
     })
   }
-  const envVars = document.querySelector('#environment-variables').value.trim()
-  if (envVars) {
-    envVars.split('\n').forEach(env => {
-      if (env.trim()) {
-        runCommand += ` -e "${env.trim()}"`
-      }
+  const buildEnv = getBuildEnv()
+  if (buildEnv.length > 0) {
+    buildEnv.forEach(env => {
+      runCommand += ` -e "${env}"`
     })
   }
   const volumes = getVolumes()
