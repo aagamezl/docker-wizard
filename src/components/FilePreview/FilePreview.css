@@ -1,0 +1,22 @@
+/* FilePreview component styles */
+.file-preview {
+  margin-bottom: 2rem;
+}
+
+.file-preview h3 {
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+pre {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+pre code {
+  display: block;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
