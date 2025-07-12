@@ -3,9 +3,11 @@ import FormSection from './components/FormSection/FormSection'
 import Button from './components/Button/Button'
 import FilePreview from './components/FilePreview/FilePreview'
 
+import { ProjectInfoForm } from './components/ProjectInfo/ProjectInfo'
+
 import './App.css'
 
-function App() {
+export const App = () => {
   return (
     <div className="container">
       <header>
@@ -24,14 +26,7 @@ function App() {
 
         <form id="wizard-form">
           <FormSection title="Project Information" active={true}>
-            <div className="form-group">
-              <label htmlFor="project-name">Project Name</label>
-              <input type="text" id="project-name" required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="base-image">Base Image</label>
-              <input type="text" id="base-image" required />
-            </div>
+            <ProjectInfoForm />
           </FormSection>
 
           <FormSection title="Build Arguments">
@@ -119,4 +114,3 @@ function App() {
   )
 }
 
-export default App
