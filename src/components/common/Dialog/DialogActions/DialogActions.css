@@ -1,0 +1,18 @@
+.dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #f7fafc;
+}
+
+.dialog-actions.justify-end {
+  justify-content: flex-end;
+}
+
+.dialog-actions.justify-between {
+  justify-content: space-between;
+}
+
+.dialog-actions .dialog-action-item {
+  display: inline-flex;
+}
