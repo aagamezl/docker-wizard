@@ -1,36 +1,61 @@
 
-import React, { useState } from 'react';
 import { useWizard } from '../../../contexts/WizardContext';
 import FormSection from '../../FormSection/FormSection';
 import { CopyList } from './CopyList';
-// import styles from './BuildProcess.module.css';
 
-// Re-export the CopyOperation type from CopyList
-import type { CopyOperation } from './CopyList';
+import type { CopyOperation } from '../../../types';
 
 export const FileOperations = () => {
   const { state, dispatch } = useWizard();
-  const [copies, setCopies] = useState<CopyOperation[]>([]);
 
   const handleAddCopy = (operation: Omit<CopyOperation, 'id'>) => {
-    setCopies(prevCopies => [...prevCopies, { ...operation, id: Date.now().toString() }]);
+    const newCopy: CopyOperation = {
+      ...operation,
+      id: `copy-${Date.now()}`,
+    };
+
+    const newCopyList = [...state.formData.fileOperations.copy, newCopy];
+
+    dispatch({
+      type: 'UPDATE_FILE_OPERATION',
+      payload: {
+        ...state.formData.fileOperations,
+        copy: newCopyList,
+      },
+    });
   };
 
   const handleUpdateCopy = (id: string, operation: Omit<CopyOperation, 'id'>) => {
-    setCopies(prevCopies => prevCopies.map(copy => 
-      copy.id === id ? { ...operation, id } : copy
-    ));
+    const updatedCopyList = state.formData.fileOperations.copy.map((copy) =>
+      copy.id === id ? { ...copy, ...operation } : copy
+    );
+
+    dispatch({
+      type: 'UPDATE_FILE_OPERATION',
+      payload: {
+        ...state.formData.fileOperations,
+        copy: updatedCopyList,
+      },
+    });
   };
 
   const handleRemoveCopy = (id: string) => {
-    setCopies(prevCopies => prevCopies.filter(copy => copy.id !== id));
+    const newCopyList = state.formData.fileOperations.copy.filter((copy) => copy.id !== id);
+
+    dispatch({
+      type: 'UPDATE_FILE_OPERATION',
+      payload: {
+        ...state.formData.fileOperations,
+        copy: newCopyList,
+      },
+    });
   };
 
   return (
     <>
       <FormSection title="File Operations" active={true}>
         <CopyList
-          copies={copies}
+          copies={state.formData.fileOperations.copy || []}
           onAdd={handleAddCopy}
           onUpdate={handleUpdateCopy}
           onRemove={handleRemoveCopy}

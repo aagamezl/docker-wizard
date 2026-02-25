@@ -118,6 +118,8 @@ export const BuildProcess = () => {
     });
   };
 
+  debugger;
+
   return (
     <>
       <FormSection title="Build Process" active={true}>

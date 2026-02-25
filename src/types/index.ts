@@ -8,10 +8,10 @@ export interface Port {
   protocol: 'tcp' | 'udp';
 }
 
-export interface Volume {
-  hostPath: string;
-  containerPath: string;
-}
+// export interface Volume {
+//   hostPath: string;
+//   containerPath: string;
+// }
 
 // export interface DockerConfig {
 //   ports: Port[];
@@ -30,19 +30,46 @@ export interface ImageConfig {
   stopSignal: string;
 }
 
-export interface FileOperation {
+export type CopyMode = 'permission' | 'link';
+
+export type CopyOperation = {
   id: string;
-  type: 'COPY' | 'ADD';
   sources: string[];
   destination: string;
-  options?: {
-    from?: string;
-    chown?: string;
-    chmod?: string;
-    link?: boolean;
-    parents?: boolean;
-    exclude?: string[];
-  };
+  mode: CopyMode;
+  // Only used when mode is 'permission'
+  chown?: string;
+  chmod?: string;
+  // Only used when mode is 'link'
+  link?: boolean;
+  // Common options
+  from?: string;
+};
+
+export type AddOperation = {
+  keepGitDir?: boolean;
+  checksum?: string;
+  chown?: string;
+  chmod?: string;
+  link?: boolean;
+};
+
+export interface FileOperation {
+  id: string;
+  // type: 'COPY' | 'ADD';
+  sources: string[];
+  destination: string;
+  copy: CopyOperation[];
+  add: AddOperation[];
+  volume: string[];
+  // options?: {
+  //   from?: string;
+  //   chown?: string;
+  //   chmod?: string;
+  //   link?: boolean;
+  //   parents?: boolean;
+  //   exclude?: string[];
+  // };
 }
 
 export interface BuildProcess {
@@ -51,7 +78,6 @@ export interface BuildProcess {
   workdir: string;
   onBuild: string;
   healthCheck: string;
-  fileOperations: FileOperation[];
 }
 
 export interface DockerComposeService {
@@ -63,6 +89,7 @@ export interface FormData {
   project: ProjectInfo;
   imageConfig: ImageConfig;
   buildProcess: BuildProcess;
+  fileOperations: FileOperation;
   dockerCompose: {
     services: DockerComposeService[];
   };
@@ -81,8 +108,8 @@ export interface WizardActions {
   | 'REMOVE_PORT'
   | 'UPDATE_PORT'
   | 'ADD_VOLUME'
-  | 'REMOVE_VOLUME'
-  | 'UPDATE_VOLUME'
+  // | 'REMOVE_VOLUME'
+  // | 'UPDATE_VOLUME'
   | 'UPDATE_DOCKER_CONFIG'
   | 'ADD_SERVICE'
   | 'REMOVE_SERVICE'
@@ -91,9 +118,9 @@ export interface WizardActions {
   | 'PREV_STEP'
   | 'SET_STEP'
   | 'UPDATE_BUILD_PROCESS'
-  | 'ADD_FILE_OPERATION'
+  // | 'ADD_FILE_OPERATION'
   | 'UPDATE_FILE_OPERATION'
-  | 'REMOVE_FILE_OPERATION';
+  // | 'REMOVE_FILE_OPERATION';
   payload: any;
 }
 

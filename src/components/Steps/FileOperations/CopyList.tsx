@@ -3,26 +3,12 @@ import type { ChangeEvent } from 'react';
 
 import Button from '../../Button/Button';
 import { Dialog, DialogTitle, DialogActions, DialogContent } from '../../common/Dialog';
-import Input from '../../Input/Input';
-import styles from '../../AtributeList/AttributeList.module.css';
+import { ActionButton, ActionButtonVariant } from '../../common/ActionButton/ActionButton';
+import type { CopyOperation, CopyMode } from '../../../types';
 
-export type CopyMode = 'permission' | 'link';
+import styles from './FileOperations.module.css';
 
-export type CopyOperation = {
-  id: string;
-  sources: string[];
-  destination: string;
-  mode: CopyMode;
-  // Only used when mode is 'permission'
-  chown?: string;
-  chmod?: string;
-  // Only used when mode is 'link'
-  link?: boolean;
-  // Common options
-  from?: string;
-};
-
-type CopyListProps = {
+export type CopyListProps = {
   copies: CopyOperation[];
   onAdd: (operation: Omit<CopyOperation, 'id'>) => void;
   onUpdate: (id: string, operation: Omit<CopyOperation, 'id'>) => void;
@@ -43,6 +29,7 @@ export const CopyList = ({ copies, onAdd, onUpdate, onRemove }: CopyListProps) =
   const handleOpenDialog = (copy?: CopyOperation) => {
     if (copy) {
       setEditingId(copy.id);
+
       setFormData({
         mode: copy.mode,
         sources: [...copy.sources],
@@ -54,7 +41,8 @@ export const CopyList = ({ copies, onAdd, onUpdate, onRemove }: CopyListProps) =
       });
     } else {
       setEditingId(null);
-setFormData({
+
+      setFormData({
         sources: [''],
         destination: '',
         mode: 'permission',
@@ -62,6 +50,7 @@ setFormData({
         chown: 'docker:docker'
       });
     }
+
     setIsDialogOpen(true);
   };
 
@@ -135,102 +124,147 @@ setFormData({
   return (
     <div className={styles.attributesSection}>
       <Dialog isOpen={isDialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle>{editingId ? 'Edit COPY Operation' : 'Add COPY Operation'}</DialogTitle>
+        <DialogTitle>
+          {editingId ? 'Edit COPY Operation' : 'Add COPY Operation'}
+        </DialogTitle>
         <DialogContent>
           <div className={styles.inputGroup}>
-            <Input
-              label="Sources (comma-separated)"
-              name="sources"
-              value={formData.sources.join(', ')}
-              onChange={handleInputChange}
-              placeholder="e.g., file1.txt, file2.txt"
-              required
-            />
-            <Input
-              label="Destination"
-              name="destination"
-              value={formData.destination}
-              onChange={handleInputChange}
-              placeholder="e.g., /app/"
-              required
-            />
+            <div className={styles.formGroup}>
+              <label htmlFor="sources">Sources (comma-separated)</label>
+              <input
+                id="sources"
+                name="sources"
+                type="text"
+                value={formData.sources.join(', ')}
+                onChange={handleInputChange}
+                placeholder="e.g., file1.txt, file2.txt"
+                className={styles.input}
+                required
+              />
+              <p className={styles.helpText}>Files or patterns to copy</p>
+            </div>
 
-            <div className={styles.optionSection}>
-              <h4>Copy Mode</h4>
-              <div className={styles.radioGroup}>
-                <label className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    name="mode"
-                    value="permission"
-                    checked={formData.mode === 'permission'}
-                    onChange={handleInputChange}
-                  />
-                  <span>Set File Permissions</span>
-                  <span className={styles.radioDescription}>
-                    Set specific ownership and permissions for the copied files
-                  </span>
-                </label>
-                
-                <label className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    name="mode"
-                    value="link"
-                    checked={formData.mode === 'link'}
-                    onChange={handleInputChange}
-                  />
-                  <span>Optimize for Build Speed (--link)</span>
-                  <span className={styles.radioDescription}>
-                    Use build cache optimization for faster builds
-                  </span>
-                </label>
+            <div className={styles.formGroup}>
+              <label htmlFor="destination">Destination</label>
+              <input
+                id="destination"
+                name="destination"
+                type="text"
+                value={formData.destination}
+                onChange={handleInputChange}
+                placeholder="e.g., /app/"
+                className={styles.input}
+                required
+              />
+              <p className={styles.helpText}>Destination path in the container</p>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Copy Mode</label>
+              <div className={styles.copyModeContainer}>
+                {/* Permission Mode Card */}
+                <div
+                  className={`${styles.copyModeCard} ${formData.mode === 'permission' ? styles.copyModeCardSelected : ''
+                    }`}
+                  onClick={() => handleInputChange({
+                    target: { name: 'mode', value: 'permission' }
+                  } as React.ChangeEvent<HTMLInputElement>)}
+                >
+                  <div className={styles.cardHeader}>
+                    <div className={`${styles.cardIcon} ${styles.permissionIcon}`}>🛡️</div>
+                    <div>
+                      <h4 className={styles.cardTitle}>Set File Permissions</h4>
+                    </div>
+                  </div>
+                  <p className={styles.cardDescription}>
+                    Control file ownership and access permissions
+                  </p>
+                </div>
+
+                {/* Link Mode Card */}
+                <div
+                  className={`${styles.copyModeCard} ${formData.mode === 'link' ? styles.copyModeCardSelected : ''
+                    }`}
+                  onClick={() => handleInputChange({
+                    target: { name: 'mode', value: 'link' }
+                  } as React.ChangeEvent<HTMLInputElement>)}
+                >
+                  <div className={styles.cardHeader}>
+                    <div className={`${styles.cardIcon} ${styles.linkIcon}`}>⚡</div>
+                    <div>
+                      <h4 className={styles.cardTitle}>Optimize Build Speed</h4>
+                    </div>
+                  </div>
+                  <p className={styles.cardDescription}>
+                    Use --link for faster builds
+                  </p>
+                </div>
               </div>
+            </div>
 
-              {formData.mode === 'permission' && (
-                <>
-                  <Input
-                    label="--chown (user:group)"
+            {formData.mode === 'permission' && (
+              <>
+                <div className={styles.formGroup}>
+                  <label htmlFor="chown">--chown (user:group)</label>
+                  <input
+                    id="chown"
                     name="chown"
+                    type="text"
                     value={formData.chown || ''}
                     onChange={handleInputChange}
                     placeholder="e.g., user:group"
+                    className={styles.input}
                   />
-                  <div className={styles.selectContainer}>
-                    <label>--chmod (permissions)</label>
-                    <select
-                      name="chmod"
-                      value={formData.chmod || '644'}
-                      onChange={handleInputChange}
-                      className={styles.select}
-                    >
-                      <option value="644">644 (rw-r--r--)</option>
-                      <option value="755">755 (rwxr-xr-x)</option>
-                      <option value="777">777 (rwxrwxrwx)</option>
-                      <option value="+x">+x (Add execute)</option>
-                      <option value="custom">Custom...</option>
-                    </select>
-                  </div>
+                  <p className={styles.helpText}>Set file ownership (user:group)</p>
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="chmod">--chmod (permissions)</label>
+                  <select
+                    id="chmod"
+                    name="chmod"
+                    value={formData.chmod || '644'}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                  >
+                    <option value="644">644 (rw-r--r--)</option>
+                    <option value="755">755 (rwxr-xr-x)</option>
+                    <option value="777">777 (rwxrwxrwx)</option>
+                    <option value="+x">+x (Add execute)</option>
+                    <option value="custom">Custom...</option>
+                  </select>
                   {formData.chmod === 'custom' && (
-                    <Input
-                      label="Custom chmod value"
+                    <input
+                      type="text"
                       name="chmod"
                       value={formData.chmod}
                       onChange={handleInputChange}
                       placeholder="e.g., 600"
+                      className={`${styles.input} ${styles.mt2}`}
                     />
                   )}
-                </>
-              )}
+                </div>
+              </>
+            )}
 
-              <h4>Advanced Options</h4>
-              <Input
-                label="--from (image/stage/context)"
+            <div className={styles.formGroup}>
+              <label htmlFor="from">--from (image/stage/context)</label>
+              <input
+                id="from"
                 name="from"
+                type="text"
                 value={formData.from || ''}
                 onChange={handleInputChange}
                 placeholder="e.g., build"
+                className={styles.input}
               />
+              <p className={styles.helpText}>Copy from a specific build stage or image</p>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Command Preview</label>
+              <div className={styles.commandPreview}>
+                {formatCopyCommand({ ...formData, id: 'preview' })}
+              </div>
             </div>
           </div>
         </DialogContent>
@@ -271,22 +305,36 @@ setFormData({
                 <code>{formatCopyCommand(copy)}</code>
               </div>
               <div className={styles.attributeActionsCell}>
-                <button
+                {/* <button
                   type="button"
                   className={styles.actionButton}
                   onClick={() => handleOpenDialog(copy)}
                   aria-label={`Edit ${copy.id}`}
                 >
                   Edit
-                </button>
-                <button
+                </button> */}
+                <ActionButton
+                  variant={ActionButtonVariant.INFO}
+                  onClick={() => handleOpenDialog(copy)}
+                  aria-label={`Edit ${copy.id}`}
+                >
+                  Edit
+                </ActionButton>
+                {/* <button
                   type="button"
                   className={styles.actionButton}
                   onClick={() => onRemove(copy.id)}
                   aria-label={`Remove ${copy.id}`}
                 >
                   Delete
-                </button>
+                </button> */}
+                <ActionButton
+                  variant={ActionButtonVariant.DELETE}
+                  onClick={() => onRemove(copy.id)}
+                  aria-label={`Remove ${copy.id}`}
+                >
+                  Delete
+                </ActionButton>
               </div>
             </div>
           ))}

@@ -36,7 +36,14 @@ export const WizardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         workdir: '',
         onBuild: '',
         healthCheck: '',
-        fileOperations: []
+      },
+      fileOperations: {
+        copy: [],
+        add: [],
+        volume: [],
+        id: '',
+        sources: [],
+        destination: ''
       },
       dockerCompose: {
         services: [],
@@ -49,28 +56,28 @@ export const WizardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       switch (action.type) {
         case 'UPDATE_PROJECT_INFO':
           return { ...prev, formData: { ...prev.formData, project: action.payload } };
-        
+
         case 'UPDATE_IMAGE_CONFIG':
           return { ...prev, formData: { ...prev.formData, imageConfig: action.payload } };
 
         case 'UPDATE_BUILD_PROCESS':
           return { ...prev, formData: { ...prev.formData, buildProcess: action.payload } };
 
-        case 'ADD_FILE_OPERATION':
-          return {
-            ...prev,
-            formData: {
-              ...prev.formData,
-              buildProcess: {
-                ...prev.formData.buildProcess,
-                fileOperations: [
-                  ...prev.formData.buildProcess.fileOperations,
-                  action.payload
-                ]
-              }
-            }
-          };
-          
+        // case 'ADD_FILE_OPERATION':
+        //   return {
+        //     ...prev,
+        //     formData: {
+        //       ...prev.formData,
+        //       buildProcess: {
+        //         ...prev.formData.buildProcess,
+        //         fileOperations: [
+        //           ...prev.formData.buildProcess.fileOperations,
+        //           action.payload
+        //         ]
+        //       }
+        //     }
+        //   };
+
         case 'UPDATE_FILE_OPERATION':
           return {
             ...prev,
@@ -84,20 +91,20 @@ export const WizardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
               }
             }
           };
-          
-        case 'REMOVE_FILE_OPERATION':
-          return {
-            ...prev,
-            formData: {
-              ...prev.formData,
-              buildProcess: {
-                ...prev.formData.buildProcess,
-                fileOperations: prev.formData.buildProcess.fileOperations.filter(
-                  op => op.id !== action.payload
-                )
-              }
-            }
-          };
+
+        // case 'REMOVE_FILE_OPERATION':
+        //   return {
+        //     ...prev,
+        //     formData: {
+        //       ...prev.formData,
+        //       buildProcess: {
+        //         ...prev.formData.buildProcess,
+        //         fileOperations: prev.formData.buildProcess.fileOperations.filter(
+        //           op => op.id !== action.payload
+        //         )
+        //       }
+        //     }
+        //   };
 
         // case 'ADD_PORT':
         //   return {

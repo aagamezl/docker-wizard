@@ -1,0 +1,203 @@
+/* Card container */
+.copyModeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+/* Base card styles */
+.copyModeCard {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Selected state */
+.copyModeCardSelected {
+  border-color: #3b82f6;
+  background-color: #f0f7ff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Card header */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Icons */
+.cardIcon {
+  font-size: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.permissionIcon {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.linkIcon {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+/* Card content */
+.cardTitle {
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 0;
+  color: #1e293b;
+}
+
+.cardDescription {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Form elements */
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Help text */
+.helpText {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+/* Command preview */
+.commandPreview {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.8125rem;
+  color: #334155;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+/* Responsive design for tablets and up */
+@media (min-width: 640px) {
+  .copyModeContainer {
+    flex-direction: row;
+  }
+
+  .copyModeCard {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* Utility classes */
+.mt2 {
+  margin-top: 0.5rem;
+}
+
+/* Existing styles from AttributeList */
+.attributesSection {
+  width: 100%;
+}
+
+.attributesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.attributesTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attributesRow {
+  display: flex;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.attributesHeaderRow {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.attributeKeyCell {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 1rem;
+}
+
+.attributeActionsCell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actionButton:hover {
+  background-color: #f8fafc;
+}
+
+.noAttributes {
+  color: #64748b;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
